@@ -1,10 +1,12 @@
 # minecraftserveronline
 ## A bot for checking online on the minecraft server
 ____
-Need Python 3 and 3 packages:  
+Need Python 3 and 4 packages:  
 `python3 pip install mcstats`  
 For use VK API:  
 `python3 pip install vk_api`  
+To output errors:  
+`python3 pip install traceback`  
 If package **time** is not defined:  
 `python3 pip install time`  
 ____
