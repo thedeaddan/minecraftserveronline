@@ -2,50 +2,74 @@ from mcstatus import MinecraftServer
 import time
 import traceback
 import vk_api
-vk = vk_api.VkApi(token="") # VK Token for notification in the conversation
-ip = "135.181.208.40:25585" # MineServer IP:Port
-server = MinecraftServer.lookup(ip) # Connect to Server
-friends = ["Steve","notch"] # list of ur friends
-online = [] # Do not modify, temporary array
-peer_id = 2000000197 # VK Dialog ID
-debug_mode = False # Debug mode for add code and dont send message in dialog
-errors = 0 # Do not modify, temporary array
-while True:
+vk = vk_api.VkApi(token="") 
+ip = "135.181.208.40:25585" 
+server = MinecraftServer.lookup(ip) 
+friends = ["thedeaddan","MICROBOOM"] 
+online = [] 
+peer_id = 2000000197 
+debug_mode = False # If u need print all info and errors in console
+print_mode = True # If u need print all info in console
+def get_message():
+	message = vk.method("messages.getHistory",{"peer_id":peer_id,"count":1})
+	return message
+def send_message(text):
+	vk.method("messages.send",{"peer_id":peer_id,"message":text,"random_id":0})
+def ping():
 	try:
-		try:
-			latency = str(server.ping()).split(".")[0] # get server ping
-			print("ping: "+latency) # Print ping
-			if int(latency) > 150: #Waiting so as not to send a lot of errors
-				time.sleep(5)
-		except Exception:
-			errors = errors + 1 # Add the number of errors for the general report
-			print("Количество зависаний: "+str(errors)) # Output of the number of errors
-			if errors % 10 == 0 and not debug_mode:
-				vk.method("messages.send",{"peer_id":peer_id,"message":"За сегодня сервер зависал уже "+str(errors)+" раз!","random_id":0}) # Sending if the number of errors is a multiple of 10
+		ping_value = str(server.ping()).split(".")[0] 
+		if int(ping_value) > 150:
+			if debug_mode or print_mode:
+				print("Ping > 150! Await 5 sec...")
 			time.sleep(5)
-		query = server.query() # Request for server information
-		players = query.players.names # Get server players
-		i = 0
-		for x in players: #Print players
-			i = i+1
-			print(str(i)+". "+x)
-		print("=====")
-		for x in friends: # Checking ur friend on server
-			if x in players:
-				if x not in online and not debug_mode:
-					print("[Бот] "+x+" сейчас на сервере!")#Print return
-					vk.method("messages.send",{"peer_id":peer_id,"message":"[Бот] "+x+" сейчас на сервере!","random_id":0})# Return in dialog // X - Ur friend nick
-					online.append(x) # add ur friend in online array
-		for x in online: # Checking for your friend's exit from the server
-			if x not in players and not debug_mode:
-				num = online.index(x) # Get ID ur friend in array 
-				print("[Бот] "+x+" вышел с сервера")
-				vk.method("messages.send",{"peer_id":peer_id,"message":"[Бот] "+x+" вышел с сервера","random_id":0})# Return in dialog // X - Ur friend nick
-				online.pop(num) # Delete ur friend nick out of array
+		else:
+			if debug_mode or print_mode:
+				print("[Ping]: "+str(ping_value))
 	except Exception:
-		errors = errors + 1
-		print("Количество зависаний: "+errors)
-		if errors % 10 == 0:
-			vk.method("messages.send",{"peer_id":peer_id,"message":"За сегодня сервер зависал уже "+str(errors)+" раз!","random_id":0})
-	time.sleep(1) # Waiting, so as not to create a load
-input()
+		if debug_mode:
+			print(traceback.format_exc())
+if debug_mode:
+	print("Debug Mode activated! All prints are active.")
+	send_message("[Бот] Внимание! Включен Debug режим. Просьба не реагировать на посылаемые ботом сообщения. Как только Дебаг закончится, сообщение удалится.")
+	message = get_message()
+	message_id = message.get("items")[0].get("id")
+try:
+	while True:
+		try:
+			ping()
+			try:
+				players = server.query().players.names  
+			except Exception:
+				print(traceback.format_exc())
+			if debug_mode or print_mode:
+				i = 0
+				print("=====")
+				for x in players: 
+					i = i+1
+					print(str(i)+". "+x)
+				print("=====")
+			for x in friends: 
+				if x in players:
+					if x not in online:
+						if debug_mode:
+							print("[Бот] "+x+" сейчас на сервере!")
+						else:
+							send_message("[Бот] "+x+" зашёл на сервер")
+						online.append(x) 
+			for x in online: 
+				if x not in players:
+					num = online.index(x) 
+					if debug_mode: 
+						print("[Бот] "+x+" вышел с сервера")
+					else:
+						send_message("[Бот] "+x+" сейчас на сервере!")
+					online.pop(num) 
+		except Exception:
+			if debug_mode:
+				print(traceback.format_exc())
+		time.sleep(1) 
+except KeyboardInterrupt:
+	if debug_mode:
+		vk.method("messages.delete",{"message_ids":message_id})
+	else:
+		print("GoodBye")
