@@ -15,7 +15,14 @@ In order to monitor the ping and run the bot in the background, you need a **scr
 Start command:  
 `screen -d -m -S onlinecheck python3 /projects/checkmineonline.py`  
 To launch:
-`screen -r onlinecheck (or just onl and he find ur procces)`  
+`screen -r onlinecheck (or just onl and he find ur procces)` 
+There are 2 modes. Debug and Print:  
+1. Displays information and errors.  
+2. 2. Outputs only errors.  
+For Debug Mode edit line 11:  
+`debug_mode = False` --> `debug_mode = True`  
+For Print Mode edit line 12:  
+`print_mode = False` --> `print_mode = True`  
 ____
 ![image](https://user-images.githubusercontent.com/40400854/127699039-5519bb87-18fa-4794-a375-cf18b0134c35.png)
 
