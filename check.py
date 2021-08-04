@@ -62,7 +62,7 @@ try:
 					if debug_mode: 
 						print("[Бот] "+x+" вышел с сервера")
 					else:
-						send_message("[Бот] "+x+" сейчас на сервере!")
+						send_message("[Бот] "+x+" вышел с сервера!")
 					online.pop(num) 
 		except Exception:
 			if debug_mode:
