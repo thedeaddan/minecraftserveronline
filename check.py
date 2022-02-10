@@ -8,16 +8,27 @@ vk = vk_api.VkApi(
     token="VKTOKEN"
 )
 ip = "135.181.208.40:25585"
+
 server = MinecraftServer.lookup(ip)
-friends = [
-    "Evil_KoT",
+friends = ["Seihokei",
+    "andre_ded",
+    "GLADIS",
+    "manyak_HOKAGE",
+    "Squirtee_Jr",
+    "thedeaddan",
     "Xrustalix",
+    "JoraD",
+    "JoraDD",
+    "BELO4KA",
+    "Magnor",
+    "iLEGING"
 ]
+
+warning = ["Magnor"]
 online = []
-peer_id = 2000000003
+peer_id = 2000000003 
 debug_mode = False
 print_mode = True
-
 
 def get_message():
     message = vk.method(
@@ -30,13 +41,14 @@ def send_message(text):
     vk.method(
         "messages.send", {"peer_id": peer_id, "message": text, "random_id": 0}
     )
-
-
+send_message("Coder: @d.grhv(thedeaddan)")
+send_message("[Бот] Хостинг перезапущен. Загружаю список игроков..")
 def ping():
     try:
         now = datetime.datetime.now()
         ping_value = str(server.ping()).split(".")[0]
-        if int(ping_value) > 250:
+        if int(ping_value) > 300:
+            print("[Ping]: " + str(ping_value))
             if (debug_mode or print_mode) and online != []:
                 message = get_message()
                 message_id = message.get("items")[0].get("id")
@@ -70,7 +82,7 @@ def ping():
                         + str(now.second)
                         + " с."
                     )
-                print("Ping > 250! Await 5 sec...")
+            print("Ping > 250! Await 5 sec...")
             time.sleep(5)
         else:
             if debug_mode or print_mode:
@@ -89,6 +101,22 @@ if debug_mode:
     message_id = message.get("items")[0].get("id")
 try:
     while True:
+        try:
+            message = get_message()
+            message_text = message.get("items")[0].get("text").lower()
+            s = 0
+            if message_text == "!чичас" or message_text == "!игроки":
+                players_check = server.query().players.names
+                online_ = ""
+                send_message("Сейчас на сервере:")
+                for x in players_check:
+                    s = s + 1
+                    online_ = online_ + str(s) + ". " + x+"\n"
+                send_message(online_)
+                x = ""
+        except Exception:
+            print("Вк лагает, ждём..")
+            time.sleep(10)
         try:
             ping()
             try:
@@ -109,7 +137,10 @@ try:
                         if debug_mode:
                             print("[Бот] " + x + " сейчас на сервере!")
                         else:
-                            send_message("[Бот] " + x + " зашёл на сервер")
+                            if x not in warning:
+                                send_message("[Бот] " + x + " сейчас на сервере.")
+                            else:
+                                send_message("[Бот] @nepidoras.mrrr(Внимание!) " + x + " сейчас на сервере.")
                         online.append(x)
             for x in online:
                 if x not in players:
@@ -117,14 +148,16 @@ try:
                     if debug_mode:
                         print("[Бот] " + x + " вышел с сервера")
                     else:
-                        send_message("[Бот] " + x + " вышел с сервера!")
+                        if x not in warning:
+                            send_message("[Бот] " + x + " вышел с сервера.")
+                        else:
+                            send_message("[Бот] @nepidoras.mrrr(Внимание!) " + x + " вышел с сервера.")
                     online.pop(num)
         except Exception:
-            if debug_mode:
-                print(traceback.format_exc())
+            print(traceback.format_exc())
         time.sleep(1)
 except KeyboardInterrupt:
     if debug_mode:
         vk.method("messages.delete", {"message_ids": message_id})
     else:
-        print("GoodBye")
+        send_message("Администратор отключил бота.")
